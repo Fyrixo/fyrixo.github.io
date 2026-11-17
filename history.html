@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f0e6">
+  <meta name="description" content="A private, read-only record of the notes you have shared.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <title>Our History — A Little Universe</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f5f0e6;
+      --paper-light: #fffdf7;
+      --ink: #3d332e;
+      --muted: #82776e;
+      --rose: #ad7474;
+      --line: rgba(91,71,56,.16);
+      --ease: cubic-bezier(.2,.75,.25,1);
+      --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--paper); }
+    body {
+      min-width: 320px;
+      min-height: 100svh;
+      margin: 0;
+      overflow-x: hidden;
+      background:
+        radial-gradient(ellipse at 18% 0%, rgba(216,193,172,.38), transparent 34rem),
+        radial-gradient(ellipse at 100% 42%, rgba(190,201,185,.24), transparent 32rem),
+        var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+    }
+    body[data-theme="rose"] { --paper: #f5ebea; --paper-light: #fff7f4; --ink: #46353a; --muted: #866f72; --rose: #a96171; --line: rgba(91,61,68,.18); }
+    body[data-theme="sage"] { --paper: #edf0e7; --paper-light: #f8f9f1; --ink: #384239; --muted: #718071; --rose: #a96870; --line: rgba(62,79,63,.18); }
+    body[data-font="modern"] { --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; --font-display: Inter, ui-sans-serif, system-ui, sans-serif; }
+    body[data-font="typewriter"] { --font-body: "Courier New", Courier, monospace; --font-display: "Courier New", Courier, monospace; }
+    button, input { color: inherit; font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px clamp(20px, 6vw, 82px);
+    }
+    .wordmark { display: inline-flex; align-items: center; gap: 10px; font-size: .68rem; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; }
+    .wordmark-mark { width: 35px; height: 35px; }
+    .site-nav { display: flex; align-items: center; gap: clamp(14px, 3vw, 30px); color: #71655c; font-size: .75rem; }
+    .site-nav a:hover { color: var(--rose); }
+    .intro { max-width: 820px; margin: 52px auto 0; padding: 0 24px; text-align: center; }
+    .eyebrow { color: #967775; font-size: .65rem; font-weight: 650; letter-spacing: .2em; text-transform: uppercase; }
+    h1, h2 { font-family: var(--font-display); font-weight: 400; }
+    h1 { margin: 18px 0 0; font-size: clamp(3.3rem, 8vw, 6.4rem); letter-spacing: -.075em; line-height: .96; }
+    h1 em { color: var(--rose); font-weight: 400; }
+    .intro p { max-width: 540px; margin: 22px auto 0; color: var(--muted); font-family: var(--font-display); font-size: 1.05rem; line-height: 1.75; }
+    .history-shell { width: min(940px, calc(100% - 36px)); margin: 52px auto 100px; }
+    .setup-panel, .auth-panel, .history-panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,253,247,.82);
+      box-shadow: 0 18px 50px rgba(74,54,39,.08);
+    }
+    .setup-panel, .auth-panel { width: min(510px, 100%); margin: 0 auto; padding: 26px; }
+    .setup-panel h2, .auth-panel h2 { margin: 0 0 8px; font-size: 1.8rem; }
+    .setup-panel p, .auth-panel p { margin: 0 0 18px; color: var(--muted); font-size: .8rem; line-height: 1.65; }
+    .auth-form { display: grid; gap: 12px; }
+    .field { display: grid; gap: 6px; color: #675a52; font-size: .69rem; }
+    .field input {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 11px;
+      border: 1px solid rgba(118,91,72,.25);
+      border-radius: 6px;
+      outline: 0;
+      background: rgba(255,255,255,.82);
+      font-size: .8rem;
+    }
+    .field input:focus { border-color: #af8078; box-shadow: 0 0 0 3px rgba(175,128,120,.15); }
+    .button {
+      display: inline-flex;
+      min-height: 42px;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 0 17px;
+      border: 1px solid #6b534b;
+      border-radius: 99px;
+      background: #6b534b;
+      color: #fffaf1;
+      font-size: .72rem;
+      transition: transform .25s var(--ease), background .25s, box-shadow .25s;
+    }
+    .button:hover { transform: translateY(-2px); background: #503c36; box-shadow: 0 8px 18px rgba(74,54,39,.15); }
+    .button:disabled { cursor: wait; opacity: .6; transform: none; }
+    .button.secondary { border-color: rgba(118,91,72,.25); background: transparent; color: #68534e; }
+    .button.secondary:hover { background: rgba(130,100,80,.1); box-shadow: none; }
+    .panel-status { min-height: 1.4em; margin: 15px 0 0; color: var(--muted); font-size: .76rem; line-height: 1.5; }
+    .panel-status[data-kind="error"] { color: #a34545; }
+    .panel-status[data-kind="success"] { color: #526e50; }
+    .history-panel { position: relative; overflow: hidden; padding: clamp(20px, 4vw, 38px); }
+    .history-panel::before {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 9px;
+      background: linear-gradient(90deg, rgba(91,67,53,.28), rgba(91,67,53,.05));
+      content: "";
+    }
+    .history-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-left: 8px; }
+    .history-head h2 { margin: 0; font-size: clamp(1.7rem, 4vw, 2.45rem); }
+    .history-head p { margin: 6px 0 0; color: var(--muted); font-size: .76rem; }
+    .history-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 28px 0 0; padding: 0 0 0 8px; list-style: none; }
+    .history-entry {
+      position: relative;
+      min-height: 175px;
+      padding: 20px 20px 18px;
+      border: 1px solid rgba(143,119,96,.19);
+      border-radius: 5px;
+      background:
+        repeating-linear-gradient(0deg, transparent 0 30px, rgba(143,119,96,.075) 31px 32px),
+        linear-gradient(145deg, rgba(255,255,255,.82), rgba(247,240,227,.76));
+      box-shadow: 0 8px 20px rgba(74,54,39,.055);
+      animation: appear .5s var(--ease) both;
+    }
+    .history-entry::before { position: absolute; top: 0; bottom: 0; left: 43px; width: 1px; background: rgba(189,126,133,.18); content: ""; }
+    .entry-meta { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding-left: 35px; }
+    .entry-author { color: #8d5f64; font-family: var(--font-display); font-size: 1rem; }
+    .entry-date { color: #8c8176; font-size: .62rem; }
+    .entry-note { position: relative; margin: 18px 0 0; padding-left: 35px; color: #51443c; font: 1rem/1.8 var(--font-display); overflow-wrap: anywhere; white-space: pre-wrap; }
+    .empty-history { grid-column: 1 / -1; margin: 0; padding: 42px 20px; color: var(--muted); font-family: var(--font-display); text-align: center; }
+    .history-actions { display: flex; justify-content: center; padding: 26px 0 0 8px; }
+    .history-foot { margin: 20px 0 0 8px; color: var(--muted); font-size: .68rem; text-align: center; }
+    footer { padding: 0 20px 28px; color: #98877b; font-size: .58rem; letter-spacing: .17em; text-align: center; }
+    @keyframes appear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @media (max-width: 650px) {
+      .site-header { align-items: flex-start; }
+      .wordmark { gap: 6px; font-size: .57rem; }
+      .site-nav { flex-wrap: wrap; justify-content: flex-end; gap: 8px 14px; font-size: .68rem; }
+      .intro { margin-top: 40px; }
+      .history-list { grid-template-columns: 1fr; }
+      .history-head { align-items: flex-start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="index.html" aria-label="Back to home"><img class="wordmark-mark" src="logo.svg" alt=""><span>A LITTLE UNIVERSE</span></a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="index.html">Home</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="books.html">Books</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="eyebrow">Little words, kept safe</div>
+      <h1>Our little <em>history.</em></h1>
+      <p>Every note you share, kept here with the name it was signed with and the moment it was written. These pages are for reading only.</p>
+    </section>
+
+    <section class="history-shell" aria-label="Private daily note history">
+      <div class="setup-panel" id="setupPanel" hidden>
+        <h2>One little setup step</h2>
+        <p>Configure Supabase, then run or re-run the latest <code>supabase-setup.sql</code> to enable the private, read-only note archive.</p>
+      </div>
+      <div class="auth-panel" id="authPanel" hidden>
+        <h2>Come on in</h2>
+        <p>Sign in with either invited account to read the private notes shared here.</p>
+        <form class="auth-form" id="signInForm">
+          <label class="field">Email
+            <input name="email" type="email" autocomplete="username" required>
+          </label>
+          <label class="field">Password
+            <input name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="button" type="submit">Open our history</button>
+        </form>
+        <p class="panel-status" id="authStatus" role="status" aria-live="polite"></p>
+      </div>
+      <div class="history-panel" id="historyPanel" hidden>
+        <div class="history-head">
+          <div>
+            <h2>Notes we’ve kept</h2>
+            <p>Newest first · all times shown in your local time</p>
+          </div>
+          <button class="button secondary" id="signOutButton" type="button">Sign out</button>
+        </div>
+        <ol class="history-list" id="historyList" aria-live="polite"></ol>
+        <div class="history-actions">
+          <button class="button secondary" id="loadOlderButton" type="button" hidden>Read older notes</button>
+        </div>
+        <p class="panel-status" id="historyStatus" role="status" aria-live="polite"></p>
+        <p class="history-foot">A quiet place to revisit what you’ve said to one another.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>MADE WITH A LITTLE EXTRA LOVE · ALWAYS</footer>
+
+  <script src="supabase-config.js"></script>
+  <script>
+    (async () => {
+      const config = window.LITTLE_UNIVERSE_SUPABASE || {};
+      const SUPABASE_URL = String(config.url || "").replace(/\/+$/, "");
+      const SUPABASE_KEY = String(config.publishableKey || "");
+      const SESSION_KEY = "little-universe-gallery-session";
+      const PAGE_SIZE = 50;
+      const configured = SUPABASE_URL.startsWith("https://")
+        && !SUPABASE_URL.includes("YOUR_PROJECT_ID")
+        && SUPABASE_KEY.length > 20
+        && !SUPABASE_KEY.includes("YOUR_SUPABASE_ANON_KEY");
+      const authPanel = document.getElementById("authPanel");
+      const historyPanel = document.getElementById("historyPanel");
+      const signInForm = document.getElementById("signInForm");
+      const historyList = document.getElementById("historyList");
+      const loadOlderButton = document.getElementById("loadOlderButton");
+      let session = null;
+      let offset = 0;
+      let loading = false;
+
+      function setStatus(element, message, kind = "") {
+        element.textContent = message;
+        element.dataset.kind = kind;
+      }
+
+      async function request(path, { method = "GET", token, body, headers = {} } = {}) {
+        const requestHeaders = { apikey: SUPABASE_KEY, ...headers };
+        if (token) requestHeaders.Authorization = `Bearer ${token}`;
+        if (body !== undefined) requestHeaders["Content-Type"] = "application/json";
+        const response = await fetch(`${SUPABASE_URL}${path}`, {
+          method,
+          headers: requestHeaders,
+          body: body === undefined ? undefined : JSON.stringify(body)
+        });
+        const text = await response.text();
+        let payload = null;
+        if (text) {
+          try { payload = JSON.parse(text); } catch { payload = { message: text }; }
+        }
+        if (!response.ok) {
+          const reason = payload && (payload.msg || payload.message || payload.error_description || payload.error);
+          throw new Error(reason || `Request failed (${response.status}).`);
+        }
+        return payload;
+      }
+
+      function saveSession(nextSession) {
+        session = {
+          ...nextSession,
+          expires_at: Date.now() + (Number(nextSession.expires_in) || 3600) * 1000
+        };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      }
+
+      function clearSession() {
+        session = null;
+        sessionStorage.removeItem(SESSION_KEY);
+      }
+
+      function showSignedOut() {
+        historyPanel.hidden = true;
+        authPanel.hidden = !configured;
+        historyList.replaceChildren();
+        loadOlderButton.hidden = true;
+        offset = 0;
+      }
+
+      async function accessToken() {
+        if (!session) throw new Error("Please sign in again.");
+        if (session.expires_at > Date.now() + 60000) return session.access_token;
+        try {
+          const refreshed = await request("/auth/v1/token?grant_type=refresh_token", {
+            method: "POST",
+            body: { refresh_token: session.refresh_token }
+          });
+          saveSession(refreshed);
+          return session.access_token;
+        } catch (error) {
+          clearSession();
+          showSignedOut();
+          throw new Error(`Your sign-in expired. Please sign in again. ${error.message}`);
+        }
+      }
+
+      async function verifyMember(token) {
+        const member = await request("/rest/v1/rpc/is_gallery_member", { method: "POST", token, body: {} });
+        if (member !== true) throw new Error("This account is not on the private gallery invite list.");
+      }
+
+      function addHistoryEntry(entry) {
+        const item = document.createElement("li");
+        item.className = "history-entry";
+        const metadata = document.createElement("div");
+        metadata.className = "entry-meta";
+        const author = document.createElement("strong");
+        author.className = "entry-author";
+        author.textContent = entry.author_name || "Friend";
+        const date = document.createElement("time");
+        date.className = "entry-date";
+        date.dateTime = entry.note_created_at;
+        const parsedDate = new Date(entry.note_created_at);
+        date.textContent = Number.isNaN(parsedDate.getTime())
+          ? "Date unavailable"
+          : parsedDate.toLocaleString([], { dateStyle: "medium", timeStyle: "short" });
+        const note = document.createElement("p");
+        note.className = "entry-note";
+        note.textContent = entry.note;
+        metadata.append(author, date);
+        item.append(metadata, note);
+        historyList.appendChild(item);
+      }
+
+      async function loadHistory() {
+        if (loading) return;
+        loading = true;
+        loadOlderButton.disabled = true;
+        setStatus(document.getElementById("historyStatus"), offset ? "Turning back a few pages…" : "Opening your history…");
+        try {
+          const token = await accessToken();
+          await verifyMember(token);
+          const entries = await request(
+            `/rest/v1/daily_note_history?select=id,author_name,note,note_created_at&order=note_created_at.desc,id.desc&limit=${PAGE_SIZE}&offset=${offset}`,
+            { token }
+          );
+          if (!Array.isArray(entries)) throw new Error("The note history could not be read.");
+          if (offset === 0 && entries.length === 0) {
+            const empty = document.createElement("li");
+            empty.className = "empty-history";
+            empty.textContent = "Your shared history is waiting for its first daily note.";
+            historyList.appendChild(empty);
+          } else {
+            entries.forEach(addHistoryEntry);
+          }
+          offset += entries.length;
+          loadOlderButton.hidden = entries.length < PAGE_SIZE;
+          setStatus(document.getElementById("historyStatus"), "");
+        } finally {
+          loading = false;
+          loadOlderButton.disabled = false;
+        }
+      }
+
+      signInForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const button = signInForm.querySelector('button[type="submit"]');
+        button.disabled = true;
+        setStatus(document.getElementById("authStatus"), "Signing in…");
+        try {
+          const form = new FormData(signInForm);
+          const result = await request("/auth/v1/token?grant_type=password", {
+            method: "POST",
+            body: {
+              email: String(form.get("email") || "").trim(),
+              password: String(form.get("password") || "")
+            }
+          });
+          saveSession(result);
+          await verifyMember(await accessToken());
+          authPanel.hidden = true;
+          historyPanel.hidden = false;
+          await loadHistory();
+        } catch (error) {
+          clearSession();
+          showSignedOut();
+          setStatus(document.getElementById("authStatus"), error.message, "error");
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      loadOlderButton.addEventListener("click", () => {
+        loadHistory().catch((error) => setStatus(document.getElementById("historyStatus"), error.message, "error"));
+      });
+
+      document.getElementById("signOutButton").addEventListener("click", async () => {
+        const token = session && session.access_token;
+        try {
+          if (token) await request("/auth/v1/logout?scope=local", { method: "POST", token });
+          clearSession();
+          showSignedOut();
+          setStatus(document.getElementById("authStatus"), "You are signed out.");
+        } catch (error) {
+          clearSession();
+          showSignedOut();
+          setStatus(document.getElementById("authStatus"), `Signed out on this device. The server could not confirm sign-out: ${error.message}`, "error");
+        }
+      });
+
+      if (!configured) {
+        document.getElementById("setupPanel").hidden = false;
+      } else {
+        const savedSession = sessionStorage.getItem(SESSION_KEY);
+        if (!savedSession) {
+          showSignedOut();
+          return;
+        }
+        try {
+          session = JSON.parse(savedSession);
+          await verifyMember(await accessToken());
+          authPanel.hidden = true;
+          historyPanel.hidden = false;
+          await loadHistory();
+        } catch (error) {
+          clearSession();
+          showSignedOut();
+          setStatus(document.getElementById("authStatus"), error.message, "error");
+        }
+      }
+    })().catch((error) => {
+      const authStatus = document.getElementById("authStatus");
+      authStatus.textContent = `The history book could not open. ${error.message}`;
+      authStatus.dataset.kind = "error";
+      document.getElementById("authPanel").hidden = false;
+    });
+  </script>
+</body>
+</html>
